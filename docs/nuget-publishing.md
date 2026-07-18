@@ -6,7 +6,7 @@
 
 1. Войти на [nuget.org](https://www.nuget.org/) (аккаунт, который будет владеть `AIGuiders.Cdp.Core`, напр. **LonelySoul**).
 2. **Профиль** → **Trusted Publishing** → GitHub:
-   - **Repository owner:** `KarataevDmitry`
+   - **Repository owner:** `AI-Guiders`
    - **Repository:** `cdp-core`
    - **Workflow file:** `nuget-publish.yml` (только имя файла)
    - **Environment:** пусто (если workflow без `environment:`)

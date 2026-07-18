@@ -1,5 +1,5 @@
 # Публикация на nuget.org через Trusted Publishing (OIDC).
-# nuget.org (LonelySoul): Trusted Publishing → owner KarataevDmitry, repo cdp-core, workflow nuget-publish.yml
+# nuget.org (LonelySoul): Trusted Publishing → owner AI-Guiders, repo cdp-core, workflow nuget-publish.yml
 name: Publish to NuGet
 
 on:

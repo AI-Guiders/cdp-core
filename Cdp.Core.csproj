@@ -12,8 +12,8 @@
     <Company>AIGuiders</Company>
     <Description>Cognitive Dev Platform shared catalog: phase×object tool affordances, session context, and ranking (Cursor CDP MCP + Cascade IDE).</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/KarataevDmitry/cdp-core</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/KarataevDmitry/cdp-core.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/AI-Guiders/cdp-core</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AI-Guiders/cdp-core.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>cdp;mcp;cascade-ide;agent-affordances;modelcontextprotocol</PackageTags>
     <PackageReadmeFile>PACKAGE_README.md</PackageReadmeFile>

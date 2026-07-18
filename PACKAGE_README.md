@@ -5,7 +5,7 @@ Shared **.NET 10** library for the Cognitive Dev Platform tool catalog:
 `catalog = f(phase, object)` with optional `intent` ranking — used by **Cursor `cdp-mcp`** and **Cascade IDE** MCP ListTools filtering.
 
 **License:** MIT  
-**Source:** [github.com/KarataevDmitry/cdp-core](https://github.com/KarataevDmitry/cdp-core)
+**Source:** [github.com/AI-Guiders/cdp-core](https://github.com/AI-Guiders/cdp-core)
 
 ---
 
