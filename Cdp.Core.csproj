@@ -7,7 +7,7 @@
     <RootNamespace>Cdp.Core</RootNamespace>
     <AssemblyName>Cdp.Core</AssemblyName>
     <PackageId>AIGuiders.Cdp.Core</PackageId>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <Authors>Dmitry Karataev; AIGuiders</Authors>
     <Company>AIGuiders</Company>
     <Description>Cognitive Dev Platform shared catalog: phase×object×language tool affordances, session context, and ranking (Cursor CDP MCP + Cascade IDE).</Description>

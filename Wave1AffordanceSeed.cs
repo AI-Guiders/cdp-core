@@ -72,6 +72,14 @@ public static class Wave1AffordanceSeed
         A("dbg", "debug_stack_trace", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1, null, CsharpLang),
         A("dbg", "debug_variables", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1, null, CsharpLang),
         A("dbg", "debug_variable_children", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1, null, CsharpLang),
+
+        // Dotnet Build/Test (C# stack)
+        A("bt", "build_structured", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Verify, CdpIntent.Change], 3, 2, "single-flight queue", CsharpLang),
+        A("bt", "run_tests", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Verify], 3, 2, null, CsharpLang),
+        A("bt", "publish_structured", [CdpPhase.Act, CdpPhase.Handoff], [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Change, CdpIntent.Ship], 3, 3, null, CsharpLang),
+        A("bt", "get_job_status", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1, null, CsharpLang),
+        A("bt", "get_job_log", ActVerify, [CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1, null, CsharpLang),
+        A("bt", "cancel_job", ActVerify, [CdpObjectKind.Process], [CdpIntent.Change], 1, 2, null, CsharpLang),
     ];
 
     private static ToolAffordance A(
