@@ -39,4 +39,30 @@ public class PhaseObjectCatalogTests
         Assert.InRange(cold.Count, 1, 12);
         Assert.All(cold, a => Assert.Contains(CdpObjectKind.Kb, a.Objects));
     }
+
+    [Fact]
+    public void Language_Python_Hides_Csharp_Only_Debug()
+    {
+        var hits = PhaseObjectCatalog.Query(
+            Seed,
+            CdpPhase.Act,
+            CdpObjectKind.Code,
+            CdpIntent.Change,
+            limit: 40,
+            language: CdpLanguage.Python);
+        Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "dbg_debug_launch");
+        Assert.DoesNotContain(hits, h => h.Affordance.Domain == "dbg");
+    }
+
+    [Fact]
+    public void Language_Csharp_Keeps_Debug_And_Boosts()
+    {
+        var withCs = PhaseObjectCatalog.Query(
+            Seed, CdpPhase.Act, CdpObjectKind.Process, CdpIntent.Change, limit: 20, language: CdpLanguage.Csharp);
+        var launch = Assert.Single(withCs, h => h.Affordance.PrefixedName == "dbg_debug_launch");
+        var noLang = PhaseObjectCatalog.Query(
+            Seed, CdpPhase.Act, CdpObjectKind.Process, CdpIntent.Change, limit: 20);
+        var launchAny = Assert.Single(noLang, h => h.Affordance.PrefixedName == "dbg_debug_launch");
+        Assert.True(launch.Score > launchAny.Score);
+    }
 }

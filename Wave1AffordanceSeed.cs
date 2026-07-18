@@ -11,6 +11,9 @@ public static class Wave1AffordanceSeed
         CdpPhase.Explore, CdpPhase.Clarify, CdpPhase.Act, CdpPhase.Verify, CdpPhase.Handoff
     ];
 
+    private static readonly CdpLanguage[] AnyLang = [CdpLanguage.Any];
+    private static readonly CdpLanguage[] CsharpLang = [CdpLanguage.Csharp];
+
     public static IReadOnlyList<ToolAffordance> Build() =>
     [
         // Agent Notes
@@ -52,23 +55,23 @@ public static class Wave1AffordanceSeed
         A("fail", "failures", ExploreClarify.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Process, CdpObjectKind.Finding], [CdpIntent.Find], 1, 1),
         A("fail", "failure_record", [CdpPhase.Act, CdpPhase.Verify], [CdpObjectKind.Process], [CdpIntent.Record], 2, 2),
 
-        // Dotnet Debug (full DAP surface; names match DotnetDebugMcp ToolCatalog)
-        A("dbg", "man", AllPhases, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find], 1, 1, "ops: stop before rebuild"),
-        A("dbg", "debug_ping", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Process], [CdpIntent.Verify], 1, 1),
-        A("dbg", "debug_set_breakpoints", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 2, 2),
-        A("dbg", "debug_list_breakpoints", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Code], [CdpIntent.Find], 1, 1),
-        A("dbg", "debug_clear_breakpoints", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 2, 2),
-        A("dbg", "debug_launch", [CdpPhase.Act], [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Change], 3, 4),
-        A("dbg", "debug_attach", [CdpPhase.Act], [CdpObjectKind.Process], [CdpIntent.Change], 3, 4),
-        A("dbg", "debug_continue", ActVerify, [CdpObjectKind.Process], [CdpIntent.Change], 2, 2),
-        A("dbg", "debug_step_over", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Change], 2, 2),
-        A("dbg", "debug_step_into", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Change], 2, 2),
-        A("dbg", "debug_step_out", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Change], 2, 2),
-        A("dbg", "debug_stop", ActVerify.Concat([CdpPhase.Handoff]).ToArray(), [CdpObjectKind.Process], [CdpIntent.Change], 1, 2, "prefer over taskkill"),
-        A("dbg", "debug_stop_context", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1, "after stopped"),
-        A("dbg", "debug_stack_trace", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1),
-        A("dbg", "debug_variables", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1),
-        A("dbg", "debug_variable_children", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1),
+        // Dotnet Debug (C# stack)
+        A("dbg", "man", AllPhases, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find], 1, 1, "ops: stop before rebuild", CsharpLang),
+        A("dbg", "debug_ping", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Process], [CdpIntent.Verify], 1, 1, null, CsharpLang),
+        A("dbg", "debug_set_breakpoints", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 2, 2, null, CsharpLang),
+        A("dbg", "debug_list_breakpoints", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Code], [CdpIntent.Find], 1, 1, null, CsharpLang),
+        A("dbg", "debug_clear_breakpoints", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 2, 2, null, CsharpLang),
+        A("dbg", "debug_launch", [CdpPhase.Act], [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Change], 3, 4, null, CsharpLang),
+        A("dbg", "debug_attach", [CdpPhase.Act], [CdpObjectKind.Process], [CdpIntent.Change], 3, 4, null, CsharpLang),
+        A("dbg", "debug_continue", ActVerify, [CdpObjectKind.Process], [CdpIntent.Change], 2, 2, null, CsharpLang),
+        A("dbg", "debug_step_over", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Change], 2, 2, null, CsharpLang),
+        A("dbg", "debug_step_into", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Change], 2, 2, null, CsharpLang),
+        A("dbg", "debug_step_out", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Change], 2, 2, null, CsharpLang),
+        A("dbg", "debug_stop", ActVerify.Concat([CdpPhase.Handoff]).ToArray(), [CdpObjectKind.Process], [CdpIntent.Change], 1, 2, "prefer over taskkill", CsharpLang),
+        A("dbg", "debug_stop_context", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1, "after stopped", CsharpLang),
+        A("dbg", "debug_stack_trace", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1, null, CsharpLang),
+        A("dbg", "debug_variables", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1, null, CsharpLang),
+        A("dbg", "debug_variable_children", ActVerify, [CdpObjectKind.Code, CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1, null, CsharpLang),
     ];
 
     private static ToolAffordance A(
@@ -79,7 +82,8 @@ public static class Wave1AffordanceSeed
         CdpIntent[] intents,
         int cost,
         int risk,
-        string? hint = null) =>
+        string? hint = null,
+        IReadOnlyList<CdpLanguage>? languages = null) =>
         new(
             $"{domain}_{underlying}",
             domain,
@@ -89,5 +93,6 @@ public static class Wave1AffordanceSeed
             intents,
             cost,
             risk,
-            hint);
+            hint,
+            languages ?? AnyLang);
 }
