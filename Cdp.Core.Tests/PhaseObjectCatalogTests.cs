@@ -8,26 +8,26 @@ public class PhaseObjectCatalogTests
     private static readonly IReadOnlyList<ToolAffordance> Seed = Wave1AffordanceSeed.Build();
 
     [Fact]
-    public void Explore_Kb_Includes_KnowledgeTags()
+    public void Explore_Kb_Includes_World_KnowledgeTags()
     {
         var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Explore, CdpObjectKind.Kb, CdpIntent.Cite);
-        Assert.Contains(hits, h => h.Affordance.PrefixedName == "an_knowledge_tags");
-        Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "an_write_knowledge_file");
+        Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_world_knowledge_tags");
+        Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "memory_world_write_knowledge_file");
     }
 
     [Fact]
     public void Act_Task_Includes_TaskUpsert()
     {
         var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Act, CdpObjectKind.Task, CdpIntent.Change);
-        Assert.Contains(hits, h => h.Affordance.PrefixedName == "tk_task_upsert");
+        Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_task_task_upsert");
     }
 
     [Fact]
     public void Intent_Cite_Ranks_Tags_Above_ListFiles()
     {
-        var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Explore, CdpObjectKind.Kb, CdpIntent.Cite, limit: 20);
-        var tags = hits.First(h => h.Affordance.PrefixedName == "an_knowledge_tags");
-        var list = hits.FirstOrDefault(h => h.Affordance.PrefixedName == "an_list_knowledge_files");
+        var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Explore, CdpObjectKind.Kb, CdpIntent.Cite, limit: 40);
+        var tags = hits.First(h => h.Affordance.PrefixedName == "memory_world_knowledge_tags");
+        var list = hits.FirstOrDefault(h => h.Affordance.PrefixedName == "memory_world_list_knowledge_files");
         if (list is not null)
             Assert.True(tags.Score >= list.Score);
     }
@@ -50,8 +50,8 @@ public class PhaseObjectCatalogTests
             CdpIntent.Change,
             limit: 40,
             language: CdpLanguage.Python);
-        Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "dbg_debug_launch");
-        Assert.DoesNotContain(hits, h => h.Affordance.Domain == "dbg");
+        Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "debug_debug_launch");
+        Assert.DoesNotContain(hits, h => h.Affordance.Domain == CdpDomains.Debug);
     }
 
     [Fact]
@@ -59,10 +59,25 @@ public class PhaseObjectCatalogTests
     {
         var withCs = PhaseObjectCatalog.Query(
             Seed, CdpPhase.Act, CdpObjectKind.Process, CdpIntent.Change, limit: 20, language: CdpLanguage.Csharp);
-        var launch = Assert.Single(withCs, h => h.Affordance.PrefixedName == "dbg_debug_launch");
+        var launch = Assert.Single(withCs, h => h.Affordance.PrefixedName == "debug_debug_launch");
         var noLang = PhaseObjectCatalog.Query(
             Seed, CdpPhase.Act, CdpObjectKind.Process, CdpIntent.Change, limit: 20);
-        var launchAny = Assert.Single(noLang, h => h.Affordance.PrefixedName == "dbg_debug_launch");
+        var launchAny = Assert.Single(noLang, h => h.Affordance.PrefixedName == "debug_debug_launch");
         Assert.True(launch.Score > launchAny.Score);
+    }
+
+    [Fact]
+    public void Split_LongestPrefix_SelfFinding()
+    {
+        Assert.True(CdpDomains.TrySplit("memory_self_finding_findings", out var d, out var u));
+        Assert.Equal(CdpDomains.MemorySelfFinding, d);
+        Assert.Equal("findings", u);
+    }
+
+    [Fact]
+    public void LayerOf_Memory_And_Dev()
+    {
+        Assert.Equal(CdpLayer.Memory, CdpDomains.LayerOf(CdpDomains.MemoryWorld));
+        Assert.Equal(CdpLayer.Dev, CdpDomains.LayerOf(CdpDomains.Build));
     }
 }

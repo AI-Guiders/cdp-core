@@ -1,0 +1,72 @@
+namespace Cdp.Core;
+
+/// <summary>Agent-facing layer (capabilities / TOML), not a CallTool prefix by itself.</summary>
+public enum CdpLayer
+{
+    Memory,
+    Dev,
+    Ide
+}
+
+/// <summary>Wire domains and CallTool name splitting (longest-prefix).</summary>
+public static class CdpDomains
+{
+    public const string MemoryWorld = "memory_world";
+    public const string MemoryProject = "memory_project";
+    public const string MemoryTask = "memory_task";
+    public const string MemorySession = "memory_session";
+    public const string MemorySkill = "memory_skill";
+    public const string MemorySelfFinding = "memory_self_finding";
+    public const string MemorySelfFailure = "memory_self_failure";
+    public const string Debug = "debug";
+    public const string Build = "build";
+    public const string Ide = "ide";
+
+    /// <summary>Longest first — required for memory_self_finding vs memory_self.</summary>
+    public static readonly IReadOnlyList<string> All =
+    [
+        MemorySelfFinding,
+        MemorySelfFailure,
+        MemoryWorld,
+        MemoryProject,
+        MemoryTask,
+        MemorySession,
+        MemorySkill,
+        Debug,
+        Build,
+        Ide
+    ];
+
+    public static CdpLayer LayerOf(string domain) => domain switch
+    {
+        MemoryWorld or MemoryProject or MemoryTask or MemorySession or MemorySkill
+            or MemorySelfFinding or MemorySelfFailure => CdpLayer.Memory,
+        Debug or Build => CdpLayer.Dev,
+        Ide => CdpLayer.Ide,
+        _ => CdpLayer.Memory
+    };
+
+    public static bool TrySplit(string toolName, out string domain, out string underlying)
+    {
+        domain = "";
+        underlying = "";
+        if (string.IsNullOrEmpty(toolName))
+            return false;
+
+        foreach (var d in All.OrderByDescending(x => x.Length))
+        {
+            if (toolName.Length > d.Length + 1
+                && toolName.StartsWith(d, StringComparison.Ordinal)
+                && toolName[d.Length] == '_')
+            {
+                domain = d;
+                underlying = toolName[(d.Length + 1)..];
+                return underlying.Length > 0;
+            }
+        }
+
+        return false;
+    }
+
+    public static string Prefixed(string domain, string underlying) => $"{domain}_{underlying}";
+}

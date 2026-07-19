@@ -2,37 +2,23 @@
 
 Shared **.NET 10** library for the Cognitive Dev Platform tool catalog:
 
-`catalog = f(phase, object [, language])` with optional `intent` ranking — used by **Cursor `cdp-mcp`** and **Cascade IDE** MCP ListTools filtering.
+`catalog = f(phase, object [, language])` with optional `intent` ranking; wire domains follow **Memory.*** / **dev** intuition (`memory_world`, `memory_task`, `debug`, `build`, …).
 
 **License:** MIT  
 **Source:** [github.com/AI-Guiders/cdp-core](https://github.com/AI-Guiders/cdp-core)
 
----
-
-## Install
-
-```bash
-dotnet add package AIGuiders.Cdp.Core
-```
-
 Prefer a sibling `ProjectReference` to `cdp-core` in the monorepo when developing; NuGet for standalone clones / CI.
-
----
 
 ## Public API (short)
 
 | Type | Role |
 |------|------|
-| `CdpPhase` / `CdpObjectKind` / `CdpIntent` / `CdpLanguage` | Finite catalog axes (not free-text goals) |
-| `ToolAffordance` | Tool metadata: phases, objects, intents, languages, cost/risk |
-| `SessionContext` | Current phase×object(+intent[+language]) |
-| `PhaseObjectCatalog.Query` | Filter + rank shortlist |
-| `Wave1AffordanceSeed` | Seed table for CDP wave1 backends (optional host data) |
-| `ICdpBackendModule` | Host backend contract (optional) |
+| `CdpPhase` / `CdpObjectKind` / `CdpIntent` / `CdpLanguage` | Catalog axes |
+| `CdpLayer` / `CdpDomains` | Memory/dev/ide layers + longest-prefix tool split |
+| `ToolAffordance` / `SessionContext` / `PhaseObjectCatalog.Query` | Shortlist |
+| `Wave1AffordanceSeed` | Seed table for CDP hosts |
 
-`CdpLanguage` sits **beside** phase×object (`any|csharp|python|delphi`). Non-goal: free-text **goal** as a catalog key (stays in agent reasoning).
-
----
+Non-goal: free-text **goal** as a catalog key.
 
 ## Consumers
 
