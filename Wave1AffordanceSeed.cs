@@ -1,6 +1,6 @@
 namespace Cdp.Core;
 
-/// <summary>Seed affordances — Memory.* / debug / build wire names (intuition-aligned).</summary>
+/// <summary>Seed affordances — Memory.* / debug / build / roslyn / git / codebase_index / anui.</summary>
 public static class Wave1AffordanceSeed
 {
     /// <summary>Read/scout through plan (no durable mutate).</summary>
@@ -17,8 +17,8 @@ public static class Wave1AffordanceSeed
         CdpPhase.Act, CdpPhase.Verify, CdpPhase.Handoff
     ];
 
-    private static readonly CdpLanguage[] AnyLang = [CdpLanguage.Any];
-    private static readonly CdpLanguage[] CsharpLang = [CdpLanguage.Csharp];
+    private static readonly string[] AnyLang = [CdpLanguages.Any];
+    private static readonly string[] CsharpLang = [CdpLanguages.Csharp];
 
     public static IReadOnlyList<ToolAffordance> Build()
     {
@@ -110,6 +110,77 @@ public static class Wave1AffordanceSeed
             A(CdpDomains.Build, "cancel_job", ActVerify, [CdpObjectKind.Process], [CdpIntent.Change], 1, 2, null, CsharpLang),
         ]);
 
+        // Dev.Roslyn — underlying = roslyn-mcp catalog names (roslyn_*); wire = roslyn_roslyn_* (same double-prefix as debug)
+        list.AddRange(
+        [
+            A(CdpDomains.Roslyn, "roslyn_ping", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Process], [CdpIntent.Verify], 1, 1, "legacy; prefer cdp_health", CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_get_document_symbols", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Code], [CdpIntent.Find], 2, 1, "legacy; prefer get_document_symbols", CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_get_symbol_at_position", ExploreAct, [CdpObjectKind.Code], [CdpIntent.Find], 2, 1, "legacy; prefer get_symbol_at_position", CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_find_usages", ExploreClarifyPlan.Concat([CdpPhase.Act]).ToArray(), [CdpObjectKind.Code], [CdpIntent.Find], 3, 1, "legacy; prefer find_usages", CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_go_to_definition", ExploreAct, [CdpObjectKind.Code], [CdpIntent.Find], 2, 1, "legacy; prefer go_to_definition", CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_rename", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 3, 3, "preview then apply", CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_get_code_actions", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Code], [CdpIntent.Find], 2, 1, null, CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_apply_code_action", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 3, 3, null, CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_get_diagnostics", ActVerify.Concat([CdpPhase.Explore]).ToArray(), [CdpObjectKind.Code], [CdpIntent.Find, CdpIntent.Verify], 2, 1, "legacy; prefer get_diagnostics", CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_get_solution_structure", ExploreClarifyPlan, [CdpObjectKind.Code, CdpObjectKind.Repo], [CdpIntent.Find], 1, 1, null, CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_get_workspace_navigation_context", ExploreClarifyPlan, [CdpObjectKind.Code], [CdpIntent.Find], 2, 1, "legacy; prefer get_workspace_navigation_context", CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_sync_namespaces", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 3, 2, "dry_run first", CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_resolve_breakpoint", ExploreAct, [CdpObjectKind.Code], [CdpIntent.Find], 1, 1, null, CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_generate_interface_from_class", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 3, 2, null, CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_generate_base_class_from_class", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 3, 2, null, CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_generate_overrides", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 3, 2, null, CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_generate_constructor_from_members", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 3, 2, null, CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_generate_equals_gethashcode", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 3, 2, null, CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_move_members_to_partial_file", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 3, 3, null, CsharpLang),
+            A(CdpDomains.Roslyn, "roslyn_sync_dependent_upon_partials", [CdpPhase.Act], [CdpObjectKind.Code], [CdpIntent.Change], 2, 2, null, CsharpLang),
+        ]);
+
+        // Dev.Git — underlying = git-mcp catalog (git_*); wire = git_git_*
+        list.AddRange(
+        [
+            A(CdpDomains.Git, "git_status", ExploreAct.Concat([CdpPhase.Verify, CdpPhase.Handoff]).ToArray(), [CdpObjectKind.Repo, CdpObjectKind.Code], [CdpIntent.Find, CdpIntent.Verify], 1, 1),
+            A(CdpDomains.Git, "git_diff", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Repo, CdpObjectKind.Code], [CdpIntent.Find, CdpIntent.Verify], 1, 1),
+            A(CdpDomains.Git, "git_log", ExploreClarifyPlan, [CdpObjectKind.Repo], [CdpIntent.Find], 1, 1),
+            A(CdpDomains.Git, "git_show", ExploreClarifyPlan, [CdpObjectKind.Repo, CdpObjectKind.Code], [CdpIntent.Find], 1, 1),
+            A(CdpDomains.Git, "git_branch", ExploreAct.Concat([CdpPhase.Handoff]).ToArray(), [CdpObjectKind.Repo], [CdpIntent.Find, CdpIntent.Change], 2, 2),
+            A(CdpDomains.Git, "git_fetch", [CdpPhase.Act], [CdpObjectKind.Repo], [CdpIntent.Change], 2, 2),
+            A(CdpDomains.Git, "git_pull", [CdpPhase.Act], [CdpObjectKind.Repo], [CdpIntent.Change], 3, 3),
+            A(CdpDomains.Git, "git_commit", [CdpPhase.Act, CdpPhase.Handoff], [CdpObjectKind.Repo], [CdpIntent.Change, CdpIntent.Ship], 3, 3),
+            A(CdpDomains.Git, "git_push", [CdpPhase.Act, CdpPhase.Handoff], [CdpObjectKind.Repo], [CdpIntent.Ship], 3, 4),
+            A(CdpDomains.Git, "git_submodule", ExploreAct, [CdpObjectKind.Repo], [CdpIntent.Find, CdpIntent.Change], 2, 2),
+            A(CdpDomains.Git, "git_preflight", ActVerify.Concat([CdpPhase.Explore]).ToArray(), [CdpObjectKind.Repo, CdpObjectKind.Code], [CdpIntent.Verify], 1, 1, "before commit"),
+            A(CdpDomains.Git, "git_preflight_fix_safe", [CdpPhase.Act], [CdpObjectKind.Repo], [CdpIntent.Change], 2, 2),
+        ]);
+
+        // Dev.CodebaseIndex (HCI) — underlying = codebase_index_*; wire double-prefix
+        list.AddRange(
+        [
+            A(CdpDomains.CodebaseIndex, "man", AllPhases, [CdpObjectKind.Code, CdpObjectKind.Repo], [CdpIntent.Find], 1, 1, "HCI ops"),
+            A(CdpDomains.CodebaseIndex, "codebase_index_version", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Process], [CdpIntent.Verify], 1, 1),
+            A(CdpDomains.CodebaseIndex, "codebase_index_search", RecallThroughPlan.Concat([CdpPhase.Act, CdpPhase.Verify]).ToArray(), [CdpObjectKind.Code, CdpObjectKind.Repo], [CdpIntent.Find], 1, 1, "search before read"),
+            A(CdpDomains.CodebaseIndex, "codebase_index_explain", ExploreClarifyPlan, [CdpObjectKind.Code], [CdpIntent.Find, CdpIntent.Cite], 1, 1),
+            A(CdpDomains.CodebaseIndex, "codebase_index_status", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Process, CdpObjectKind.Repo], [CdpIntent.Find, CdpIntent.Verify], 1, 1),
+            A(CdpDomains.CodebaseIndex, "codebase_index_reindex", [CdpPhase.Act], [CdpObjectKind.Repo, CdpObjectKind.Process], [CdpIntent.Change], 3, 2),
+            A(CdpDomains.CodebaseIndex, "codebase_index_watch", [CdpPhase.Act], [CdpObjectKind.Repo, CdpObjectKind.Process], [CdpIntent.Change], 2, 2),
+            A(CdpDomains.CodebaseIndex, "codebase_index_verify", ActVerify, [CdpObjectKind.Repo, CdpObjectKind.Process], [CdpIntent.Verify], 2, 1),
+            A(CdpDomains.CodebaseIndex, "codebase_index_draft_doc", [CdpPhase.Act, CdpPhase.Handoff], [CdpObjectKind.Code, CdpObjectKind.Kb], [CdpIntent.Change, CdpIntent.Record], 2, 2),
+            A(CdpDomains.CodebaseIndex, "codebase_index_vec_reindex", [CdpPhase.Act], [CdpObjectKind.Repo], [CdpIntent.Change], 3, 2),
+        ]);
+
+        // Dev.Anui — UI evidence; wire anui_anui_* / anui_man
+        list.AddRange(
+        [
+            A(CdpDomains.Anui, "man", AllPhases, [CdpObjectKind.Process], [CdpIntent.Find], 1, 1, "ANUI ops"),
+            A(CdpDomains.Anui, "anui_list_adapters", ExploreClarifyPlan, [CdpObjectKind.Process], [CdpIntent.Find], 1, 1),
+            A(CdpDomains.Anui, "anui_audit", ActVerify.Concat([CdpPhase.Explore]).ToArray(), [CdpObjectKind.Process], [CdpIntent.Verify], 1, 1, "outline first"),
+            A(CdpDomains.Anui, "anui_get_evidence", ActVerify, [CdpObjectKind.Process], [CdpIntent.Find, CdpIntent.Verify], 1, 1),
+            A(CdpDomains.Anui, "anui_get_node", ActVerify, [CdpObjectKind.Process], [CdpIntent.Find], 1, 1),
+            A(CdpDomains.Anui, "anui_query", ExploreAct.Concat([CdpPhase.Verify]).ToArray(), [CdpObjectKind.Process], [CdpIntent.Find], 1, 1),
+            A(CdpDomains.Anui, "anui_run_invariants", ActVerify, [CdpObjectKind.Process], [CdpIntent.Verify], 1, 1),
+            A(CdpDomains.Anui, "anui_set_window_profile", [CdpPhase.Act], [CdpObjectKind.Process], [CdpIntent.Change], 2, 2),
+            A(CdpDomains.Anui, "anui_ingest", [CdpPhase.Act, CdpPhase.Explore], [CdpObjectKind.Process, CdpObjectKind.Code], [CdpIntent.Find, CdpIntent.Change], 2, 2),
+        ]);
+
         return list;
     }
 
@@ -147,7 +218,7 @@ public static class Wave1AffordanceSeed
         int cost,
         int risk,
         string? hint = null,
-        IReadOnlyList<CdpLanguage>? languages = null) =>
+        IReadOnlyList<string>? languages = null) =>
         new(
             CdpDomains.Prefixed(domain, underlying),
             domain,

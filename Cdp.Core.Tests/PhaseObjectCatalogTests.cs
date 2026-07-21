@@ -16,6 +16,52 @@ public class PhaseObjectCatalogTests
     }
 
     [Fact]
+    public void Recall_Kb_Excludes_ListFiles_Includes_Pack()
+    {
+        var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Recall, CdpObjectKind.Kb, CdpIntent.Cite);
+        Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_world_get_definition");
+        Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_world_knowledge_tags");
+        Assert.DoesNotContain(hits, h => h.Affordance.UnderlyingName == "list_knowledge_files");
+        Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "memory_project_get_definition");
+        Assert.True(hits.Count <= PhaseObjectCatalog.DefaultListToolsLimit);
+    }
+
+    [Fact]
+    public void Explore_Kb_Can_ListFiles()
+    {
+        var hits = PhaseObjectCatalog.Query(
+            Seed, CdpPhase.Explore, CdpObjectKind.Kb, CdpIntent.Find, limit: PhaseObjectCatalog.MaxQueryLimit);
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "list_knowledge_files");
+    }
+
+    [Fact]
+    public void Explore_Kb_Includes_Pack_GetDefinition_World_Only()
+    {
+        var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Explore, CdpObjectKind.Kb, CdpIntent.Cite);
+        Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_world_get_definition");
+        Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "memory_project_get_definition");
+        Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "memory_skill_get_definition");
+    }
+
+    [Fact]
+    public void Explore_Kb_ListTools_Budget_Is_Tight()
+    {
+        var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Explore, CdpObjectKind.Kb, CdpIntent.Cite);
+        Assert.True(hits.Count <= PhaseObjectCatalog.DefaultListToolsLimit);
+        var underlyings = hits.Select(h => h.Affordance.UnderlyingName).ToArray();
+        Assert.Equal(underlyings.Length, underlyings.Distinct(StringComparer.Ordinal).Count());
+    }
+
+    [Fact]
+    public void Explore_Kb_Includes_RadiusGate()
+    {
+        var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Explore, CdpObjectKind.Kb, CdpIntent.Cite);
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "radius_gate_check");
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "get_process");
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "get_procedure");
+    }
+
+    [Fact]
     public void Act_Task_Includes_TaskUpsert()
     {
         var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Act, CdpObjectKind.Task, CdpIntent.Change);
@@ -25,7 +71,8 @@ public class PhaseObjectCatalogTests
     [Fact]
     public void Intent_Cite_Ranks_Tags_Above_ListFiles()
     {
-        var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Explore, CdpObjectKind.Kb, CdpIntent.Cite, limit: 40);
+        var hits = PhaseObjectCatalog.Query(
+            Seed, CdpPhase.Explore, CdpObjectKind.Kb, CdpIntent.Cite, limit: PhaseObjectCatalog.MaxQueryLimit);
         var tags = hits.First(h => h.Affordance.PrefixedName == "memory_world_knowledge_tags");
         var list = hits.FirstOrDefault(h => h.Affordance.PrefixedName == "memory_world_list_knowledge_files");
         if (list is not null)
@@ -33,11 +80,14 @@ public class PhaseObjectCatalogTests
     }
 
     [Fact]
-    public void ColdStart_Is_Small()
+    public void ColdStart_Is_Recall_Not_Browse()
     {
         var cold = PhaseObjectCatalog.DefaultColdStart(Seed);
-        Assert.InRange(cold.Count, 1, 12);
+        Assert.InRange(cold.Count, 1, PhaseObjectCatalog.DefaultListToolsLimit);
         Assert.All(cold, a => Assert.Contains(CdpObjectKind.Kb, a.Objects));
+        Assert.Contains(cold, a => a.PrefixedName == "memory_world_get_definition");
+        Assert.DoesNotContain(cold, a => a.UnderlyingName == "list_knowledge_files");
+        Assert.All(cold, a => Assert.Contains(CdpPhase.Recall, a.Phases));
     }
 
     [Fact]
@@ -48,8 +98,8 @@ public class PhaseObjectCatalogTests
             CdpPhase.Act,
             CdpObjectKind.Code,
             CdpIntent.Change,
-            limit: 40,
-            language: CdpLanguage.Python);
+            limit: PhaseObjectCatalog.MaxQueryLimit,
+            language: CdpLanguages.Python);
         Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "debug_debug_launch");
         Assert.DoesNotContain(hits, h => h.Affordance.Domain == CdpDomains.Debug);
     }
@@ -58,7 +108,7 @@ public class PhaseObjectCatalogTests
     public void Language_Csharp_Keeps_Debug_And_Boosts()
     {
         var withCs = PhaseObjectCatalog.Query(
-            Seed, CdpPhase.Act, CdpObjectKind.Process, CdpIntent.Change, limit: 20, language: CdpLanguage.Csharp);
+            Seed, CdpPhase.Act, CdpObjectKind.Process, CdpIntent.Change, limit: 20, language: CdpLanguages.Csharp);
         var launch = Assert.Single(withCs, h => h.Affordance.PrefixedName == "debug_debug_launch");
         var noLang = PhaseObjectCatalog.Query(
             Seed, CdpPhase.Act, CdpObjectKind.Process, CdpIntent.Change, limit: 20);
@@ -79,5 +129,70 @@ public class PhaseObjectCatalogTests
     {
         Assert.Equal(CdpLayer.Memory, CdpDomains.LayerOf(CdpDomains.MemoryWorld));
         Assert.Equal(CdpLayer.Dev, CdpDomains.LayerOf(CdpDomains.Build));
+        Assert.Equal(CdpLayer.Dev, CdpDomains.LayerOf(CdpDomains.Roslyn));
+        Assert.Equal(CdpLayer.Dev, CdpDomains.LayerOf(CdpDomains.Git));
+        Assert.Equal(CdpLayer.Dev, CdpDomains.LayerOf(CdpDomains.CodebaseIndex));
+        Assert.Equal(CdpLayer.Dev, CdpDomains.LayerOf(CdpDomains.Anui));
+    }
+
+    [Fact]
+    public void Split_Roslyn_DoublePrefix()
+    {
+        Assert.True(CdpDomains.TrySplit("roslyn_roslyn_get_diagnostics", out var d, out var u));
+        Assert.Equal(CdpDomains.Roslyn, d);
+        Assert.Equal("roslyn_get_diagnostics", u);
+    }
+
+    [Fact]
+    public void Split_CodebaseIndex_DoublePrefix()
+    {
+        Assert.True(CdpDomains.TrySplit("codebase_index_codebase_index_search", out var d, out var u));
+        Assert.Equal(CdpDomains.CodebaseIndex, d);
+        Assert.Equal("codebase_index_search", u);
+    }
+
+    [Fact]
+    public void Split_Git_DoublePrefix()
+    {
+        Assert.True(CdpDomains.TrySplit("git_git_status", out var d, out var u));
+        Assert.Equal(CdpDomains.Git, d);
+        Assert.Equal("git_status", u);
+    }
+
+    [Fact]
+    public void ParsePhase_Recall()
+    {
+        Assert.True(CdpEnumParse.TryParsePhase("recall", out var p));
+        Assert.Equal(CdpPhase.Recall, p);
+        Assert.Equal("recall", CdpEnumParse.ToWire(CdpPhase.Recall));
+    }
+
+    [Fact]
+    public void ParsePhase_Plan()
+    {
+        Assert.True(CdpEnumParse.TryParsePhase("plan", out var p));
+        Assert.Equal(CdpPhase.Plan, p);
+        Assert.Equal("plan", CdpEnumParse.ToWire(CdpPhase.Plan));
+    }
+
+    [Fact]
+    public void Act_Kb_Change_Keeps_World_And_Project_Append()
+    {
+        var hits = PhaseObjectCatalog.Query(
+            Seed, CdpPhase.Act, CdpObjectKind.Kb, CdpIntent.Change, limit: PhaseObjectCatalog.MaxQueryLimit);
+        Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_world_append_knowledge_file");
+        Assert.Contains(hits, h => h.Affordance.PrefixedName == "memory_project_append_knowledge_file");
+        var projectAppend = hits.First(h => h.Affordance.PrefixedName == "memory_project_append_knowledge_file");
+        Assert.Contains("kolb JOURNAL", projectAppend.Affordance.Hint);
+    }
+
+    [Fact]
+    public void Plan_Kb_Includes_Pack_Scouts_Excludes_Writes()
+    {
+        var hits = PhaseObjectCatalog.Query(Seed, CdpPhase.Plan, CdpObjectKind.Kb, CdpIntent.Find);
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "get_procedure");
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "get_definition");
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "list_knowledge_files");
+        Assert.DoesNotContain(hits, h => h.Affordance.UnderlyingName == "write_knowledge_file");
     }
 }

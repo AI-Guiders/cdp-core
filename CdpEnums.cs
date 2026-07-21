@@ -2,8 +2,12 @@ namespace Cdp.Core;
 
 public enum CdpPhase
 {
+    /// <summary>Pull known memory into context (canon, hot, pack cards) — not discovery.</summary>
+    Recall,
     Explore,
     Clarify,
+    /// <summary>Before act: critique brief, scout reuse, name variants/rejects — not mutate.</summary>
+    Plan,
     Act,
     Verify,
     Handoff
@@ -31,18 +35,6 @@ public enum CdpIntent
     Ship
 }
 
-/// <summary>
-/// Stack/language axis beside phase×object (not a goal).
-/// <see cref="Any"/> = language-agnostic affordance (KB, TK, session, …).
-/// </summary>
-public enum CdpLanguage
-{
-    Any,
-    Csharp,
-    Python,
-    Delphi
-}
-
 public static class CdpEnumParse
 {
     public static bool TryParsePhase(string? raw, out CdpPhase phase) =>
@@ -54,34 +46,16 @@ public static class CdpEnumParse
     public static bool TryParseIntent(string? raw, out CdpIntent intent) =>
         Enum.TryParse(Normalize(raw), ignoreCase: true, out intent);
 
-    public static bool TryParseLanguage(string? raw, out CdpLanguage language)
-    {
-        language = default;
-        if (raw is null)
-            return false;
-        var n = Normalize(raw);
-        if (n.Length == 0)
-            return false;
-        if (n is "any" or "*")
-        {
-            language = CdpLanguage.Any;
-            return true;
-        }
-
-        n = n switch
-        {
-            "cs" or "c#" or "csharp" => nameof(CdpLanguage.Csharp),
-            "py" or "python" => nameof(CdpLanguage.Python),
-            "pas" or "delphi" or "objectpascal" => nameof(CdpLanguage.Delphi),
-            _ => n
-        };
-        return Enum.TryParse(n, ignoreCase: true, out language);
-    }
+    /// <summary>
+    /// Prefer <see cref="LanguageRegistry.TryNormalize"/> from host config.
+    /// Fallback uses <see cref="LanguageRegistry.Default"/>.
+    /// </summary>
+    public static bool TryParseLanguage(string? raw, out string language) =>
+        LanguageRegistry.Default.TryNormalize(raw, out language);
 
     public static string ToWire(CdpPhase p) => p.ToString().ToLowerInvariant();
     public static string ToWire(CdpObjectKind o) => o.ToString().ToLowerInvariant();
     public static string ToWire(CdpIntent i) => i.ToString().ToLowerInvariant();
-    public static string ToWire(CdpLanguage l) => l.ToString().ToLowerInvariant();
 
     private static string Normalize(string? raw) =>
         string.IsNullOrWhiteSpace(raw) ? "" : raw.Trim();

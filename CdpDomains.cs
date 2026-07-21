@@ -20,13 +20,19 @@ public static class CdpDomains
     public const string MemorySelfFailure = "memory_self_failure";
     public const string Debug = "debug";
     public const string Build = "build";
+    public const string Roslyn = "roslyn";
+    public const string Git = "git";
+    /// <summary>Hybrid Codebase Index (HCI) — not human–computer interface.</summary>
+    public const string CodebaseIndex = "codebase_index";
+    public const string Anui = "anui";
     public const string Ide = "ide";
 
-    /// <summary>Longest first — required for memory_self_finding vs memory_self.</summary>
+    /// <summary>Longest first — required for memory_self_finding vs memory_self / codebase_index.</summary>
     public static readonly IReadOnlyList<string> All =
     [
         MemorySelfFinding,
         MemorySelfFailure,
+        CodebaseIndex,
         MemoryWorld,
         MemoryProject,
         MemoryTask,
@@ -34,6 +40,9 @@ public static class CdpDomains
         MemorySkill,
         Debug,
         Build,
+        Roslyn,
+        Git,
+        Anui,
         Ide
     ];
 
@@ -41,7 +50,7 @@ public static class CdpDomains
     {
         MemoryWorld or MemoryProject or MemoryTask or MemorySession or MemorySkill
             or MemorySelfFinding or MemorySelfFailure => CdpLayer.Memory,
-        Debug or Build => CdpLayer.Dev,
+        Debug or Build or Roslyn or Git or CodebaseIndex or Anui => CdpLayer.Dev,
         Ide => CdpLayer.Ide,
         _ => CdpLayer.Memory
     };

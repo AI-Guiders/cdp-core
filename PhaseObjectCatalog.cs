@@ -18,12 +18,12 @@ public static class PhaseObjectCatalog
         CdpObjectKind obj,
         CdpIntent? intent = null,
         int limit = DefaultListToolsLimit,
-        CdpLanguage? language = null,
+        string? language = null,
         bool dedupeByUnderlying = true)
     {
         var lim = Math.Clamp(limit, 1, MaxQueryLimit);
         var hits = new List<CatalogHit>();
-        var langFilter = language is { } lf && lf != CdpLanguage.Any ? lf : (CdpLanguage?)null;
+        var langFilter = CdpLanguages.IsAny(language) ? null : language!.Trim().ToLowerInvariant();
 
         foreach (var a in all)
         {
@@ -35,7 +35,8 @@ public static class PhaseObjectCatalog
             var langs = a.EffectiveLanguages;
             if (langFilter is { } wantLang)
             {
-                if (!langs.Contains(CdpLanguage.Any) && !langs.Contains(wantLang))
+                if (!langs.Any(l => l.Equals(CdpLanguages.Any, StringComparison.OrdinalIgnoreCase))
+                    && !langs.Any(l => l.Equals(wantLang, StringComparison.OrdinalIgnoreCase)))
                     continue;
             }
 
@@ -52,7 +53,7 @@ public static class PhaseObjectCatalog
 
             if (langFilter is { } wl)
             {
-                if (langs.Contains(wl))
+                if (langs.Any(l => l.Equals(wl, StringComparison.OrdinalIgnoreCase)))
                     score += 15;
             }
 

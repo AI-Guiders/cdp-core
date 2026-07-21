@@ -13,7 +13,8 @@ Prefer a sibling `ProjectReference` to `cdp-core` in the monorepo when developin
 
 | Type | Role |
 |------|------|
-| `CdpPhase` / `CdpObjectKind` / `CdpIntent` / `CdpLanguage` | Catalog axes |
+| `CdpPhase` / `CdpObjectKind` / `CdpIntent` | Catalog axes |
+| `LanguageRegistry` / `CdpLanguages` | Language ids from config (not a closed enum) |
 | `CdpLayer` / `CdpDomains` | Memory/dev/ide layers + longest-prefix tool split |
 | `ToolAffordance` / `SessionContext` / `PhaseObjectCatalog.Query` | Shortlist |
 | `Wave1AffordanceSeed` | Seed table for CDP hosts |
