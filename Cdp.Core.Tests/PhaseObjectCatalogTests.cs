@@ -195,4 +195,24 @@ public class PhaseObjectCatalogTests
         Assert.Contains(hits, h => h.Affordance.UnderlyingName == "list_knowledge_files");
         Assert.DoesNotContain(hits, h => h.Affordance.UnderlyingName == "write_knowledge_file");
     }
+
+    [Fact]
+    public void Explore_Code_Find_Prefers_Hci_Search_Over_Legacy_Roslyn()
+    {
+        var hits = PhaseObjectCatalog.Query(
+            Seed,
+            CdpPhase.Explore,
+            CdpObjectKind.Code,
+            CdpIntent.Find,
+            limit: PhaseObjectCatalog.DefaultListToolsLimit,
+            language: CdpLanguages.Csharp);
+
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "codebase_index_search");
+        var search = hits.First(h => h.Affordance.UnderlyingName == "codebase_index_search");
+        var legacyGo = hits.FirstOrDefault(h => h.Affordance.UnderlyingName == "roslyn_go_to_definition");
+        if (legacyGo is not null)
+            Assert.True(search.Score > legacyGo.Score);
+
+        Assert.DoesNotContain(hits, h => h.Affordance.Domain == CdpDomains.Debug);
+    }
 }

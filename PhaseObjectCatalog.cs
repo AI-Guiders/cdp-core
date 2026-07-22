@@ -57,6 +57,20 @@ public static class PhaseObjectCatalog
                     score += 15;
             }
 
+            // Bare IDE verbs cover find; legacy roslyn_* / debug noise should not own explore+code palette.
+            if (a.Hint is { } hint
+                && hint.StartsWith("legacy", StringComparison.OrdinalIgnoreCase))
+                score -= 55;
+
+            if (obj == CdpObjectKind.Code && intent == CdpIntent.Find)
+            {
+                if (a.Domain == CdpDomains.Debug)
+                    score -= 35;
+                if (a.Domain == CdpDomains.CodebaseIndex
+                    && a.UnderlyingName.Contains("search", StringComparison.Ordinal))
+                    score += 25;
+            }
+
             hits.Add(new CatalogHit(a, score));
         }
 
