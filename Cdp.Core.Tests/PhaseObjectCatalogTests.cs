@@ -230,15 +230,15 @@ public class PhaseObjectCatalogTests
     }
 
     [Fact]
-    public void SessionContext_Serializes_ScmRoot()
+    public void Act_Code_Ship_Includes_Git_Commit()
     {
-        var s = new SessionContext
-        {
-            ProjectRoot = @"D:\proj",
-            ScmRoot = @"D:\repo"
-        };
-        var json = s.ToJson();
-        Assert.Contains("scm_root", json, StringComparison.Ordinal);
-        Assert.Contains("repo", json, StringComparison.Ordinal);
+        var hits = PhaseObjectCatalog.Query(
+            Seed,
+            CdpPhase.Act,
+            CdpObjectKind.Code,
+            CdpIntent.Ship,
+            limit: PhaseObjectCatalog.MaxQueryLimit);
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "git_commit");
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "git_push");
     }
 }
