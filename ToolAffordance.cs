@@ -43,6 +43,12 @@ public sealed class SessionContext
     /// <summary>Primary tsconfig path when opened as typescript.</summary>
     public string? TsConfigPath { get; set; }
 
+    /// <summary>
+    /// Git toplevel for session project (<c>git rev-parse --show-toplevel</c> after <c>cdp_open</c>).
+    /// CDP injects as default <c>workspace_path</c> for <c>git_*</c> when omitted.
+    /// </summary>
+    public string? ScmRoot { get; set; }
+
     public string ToJson() =>
         System.Text.Json.JsonSerializer.Serialize(new
         {
@@ -53,7 +59,8 @@ public sealed class SessionContext
             project_root = ProjectRoot,
             project_kind = ProjectKind,
             solution_or_project_path = SolutionOrProjectPath,
-            tsconfig_path = TsConfigPath
+            tsconfig_path = TsConfigPath,
+            scm_root = ScmRoot
         }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
 
     public void CopyFrom(SessionContext other)
@@ -66,6 +73,7 @@ public sealed class SessionContext
         ProjectKind = other.ProjectKind;
         SolutionOrProjectPath = other.SolutionOrProjectPath;
         TsConfigPath = other.TsConfigPath;
+        ScmRoot = other.ScmRoot;
     }
 
     public SessionContext Clone()

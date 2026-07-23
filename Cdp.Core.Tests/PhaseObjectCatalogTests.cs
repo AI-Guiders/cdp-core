@@ -215,4 +215,30 @@ public class PhaseObjectCatalogTests
 
         Assert.DoesNotContain(hits, h => h.Affordance.Domain == CdpDomains.Debug);
     }
+
+    [Fact]
+    public void Explore_Code_Includes_Git_Scene()
+    {
+        var hits = PhaseObjectCatalog.Query(
+            Seed,
+            CdpPhase.Explore,
+            CdpObjectKind.Code,
+            CdpIntent.Find,
+            limit: PhaseObjectCatalog.MaxQueryLimit);
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "git_scene");
+        Assert.Contains(hits, h => h.Affordance.UnderlyingName == "git_diff_scene");
+    }
+
+    [Fact]
+    public void SessionContext_Serializes_ScmRoot()
+    {
+        var s = new SessionContext
+        {
+            ProjectRoot = @"D:\proj",
+            ScmRoot = @"D:\repo"
+        };
+        var json = s.ToJson();
+        Assert.Contains("scm_root", json, StringComparison.Ordinal);
+        Assert.Contains("repo", json, StringComparison.Ordinal);
+    }
 }

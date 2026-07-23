@@ -135,6 +135,8 @@ public static class PhaseObjectCatalog
         },
         CdpObjectKind.Session => domain == CdpDomains.MemorySession ? 30 : 0,
         CdpObjectKind.Task => domain == CdpDomains.MemoryTask ? 30 : 0,
+        CdpObjectKind.Repo => domain == CdpDomains.Git ? 28 : 0,
+        CdpObjectKind.Code => domain == CdpDomains.Git ? 12 : 0,
         _ => 0
     };
 
