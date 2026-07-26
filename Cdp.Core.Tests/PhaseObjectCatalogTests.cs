@@ -176,6 +176,14 @@ public class PhaseObjectCatalogTests
     }
 
     [Fact]
+    public void ParsePhase_Review()
+    {
+        Assert.True(CdpEnumParse.TryParsePhase("review", out var p));
+        Assert.Equal(CdpPhase.Review, p);
+        Assert.Equal("review", CdpEnumParse.ToWire(CdpPhase.Review));
+    }
+
+    [Fact]
     public void Act_Kb_Change_Keeps_World_And_Project_Append()
     {
         var hits = PhaseObjectCatalog.Query(

@@ -10,6 +10,8 @@ public enum CdpPhase
     Plan,
     Act,
     Verify,
+    /// <summary>Judgment after verify, before ship — blast radius, intent match, not machine green.</summary>
+    Review,
     Handoff
 }
 
