@@ -77,5 +77,31 @@ public static class CdpDomains
         return false;
     }
 
-    public static string Prefixed(string domain, string underlying) => $"{domain}_{underlying}";
+    public static string Prefixed(string domain, string underlying)
+    {
+        // Catalog tools already named `{domain}_*` (debug_launch, git_scene, codebase_index_search)
+        // must not become domain_domain_* on the wire.
+        if (underlying.StartsWith(domain + "_", StringComparison.Ordinal))
+            return underlying;
+        return domain + "_" + underlying;
+    }
+
+    /// <summary>
+    /// After <see cref="TrySplit"/>, restore catalog tool id when <see cref="Prefixed"/> collapsed
+    /// a domain-prefixed underlying (legacy double-prefix CallTool names still work).
+    /// </summary>
+    public static string ExpandUnderlying(string domain, string underlying)
+    {
+        if (string.IsNullOrEmpty(underlying))
+            return underlying;
+
+        // Product catalogs that bake the domain into tool names.
+        if (domain is not (Debug or Roslyn or Git or CodebaseIndex or Anui))
+            return underlying;
+
+        var prefix = domain + "_";
+        return underlying.StartsWith(prefix, StringComparison.Ordinal)
+            ? underlying
+            : prefix + underlying;
+    }
 }

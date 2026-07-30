@@ -100,7 +100,7 @@ public class PhaseObjectCatalogTests
             CdpIntent.Change,
             limit: PhaseObjectCatalog.MaxQueryLimit,
             language: CdpLanguages.Python);
-        Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "debug_debug_launch");
+        Assert.DoesNotContain(hits, h => h.Affordance.PrefixedName == "debug_launch");
         Assert.DoesNotContain(hits, h => h.Affordance.Domain == CdpDomains.Debug);
     }
 
@@ -109,10 +109,10 @@ public class PhaseObjectCatalogTests
     {
         var withCs = PhaseObjectCatalog.Query(
             Seed, CdpPhase.Act, CdpObjectKind.Process, CdpIntent.Change, limit: 20, language: CdpLanguages.Csharp);
-        var launch = Assert.Single(withCs, h => h.Affordance.PrefixedName == "debug_debug_launch");
+        var launch = Assert.Single(withCs, h => h.Affordance.PrefixedName == "debug_launch");
         var noLang = PhaseObjectCatalog.Query(
             Seed, CdpPhase.Act, CdpObjectKind.Process, CdpIntent.Change, limit: 20);
-        var launchAny = Assert.Single(noLang, h => h.Affordance.PrefixedName == "debug_debug_launch");
+        var launchAny = Assert.Single(noLang, h => h.Affordance.PrefixedName == "debug_launch");
         Assert.True(launch.Score > launchAny.Score);
     }
 
