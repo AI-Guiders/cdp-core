@@ -11,6 +11,7 @@ public static class CdpLanguages
     public const string Typescript = "typescript";
     public const string Python = "python";
     public const string Delphi = "delphi";
+    public const string PowerShell = "powershell";
 
     public static bool IsAny(string? language) =>
         string.IsNullOrWhiteSpace(language)
@@ -76,7 +77,7 @@ public sealed class LanguageRegistry
 
     /// <summary>Built-in defaults matching historical enum + detector behaviour.</summary>
     public static LanguageRegistry CreateDefault() => new(
-        ids: [CdpLanguages.Csharp, CdpLanguages.Typescript, CdpLanguages.Python, CdpLanguages.Delphi],
+        ids: [CdpLanguages.Csharp, CdpLanguages.Typescript, CdpLanguages.Python, CdpLanguages.Delphi, CdpLanguages.PowerShell],
         aliases:
         [
             new("cs", CdpLanguages.Csharp),
@@ -86,6 +87,9 @@ public sealed class LanguageRegistry
             new("py", CdpLanguages.Python),
             new("pas", CdpLanguages.Delphi),
             new("objectpascal", CdpLanguages.Delphi),
+            new("ps1", CdpLanguages.PowerShell),
+            new("pwsh", CdpLanguages.PowerShell),
+            new("ps", CdpLanguages.PowerShell),
         ],
         detectRules:
         [
@@ -94,6 +98,8 @@ public sealed class LanguageRegistry
             new(CdpLanguages.Csharp, "csproj", 20, Extension: ".csproj"),
             new(CdpLanguages.Typescript, "tsconfig", 30, FileName: "tsconfig.json"),
             new(CdpLanguages.Python, "pyproject", 40, FileName: "pyproject.toml"),
+            new(CdpLanguages.PowerShell, "ps1", 50, Extension: ".ps1"),
+            new(CdpLanguages.PowerShell, "psm1", 51, Extension: ".psm1"),
         ]);
 
     public bool TryNormalize(string? raw, out string languageId)
