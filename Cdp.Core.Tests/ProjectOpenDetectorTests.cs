@@ -77,6 +77,34 @@ public class ProjectOpenDetectorTests
     }
 
     [Fact]
+    public void Detect_Ps1_File()
+    {
+        var dir = CreateTempDir();
+        try
+        {
+            var ps1 = Path.Combine(dir, "deploy.ps1");
+            File.WriteAllText(ps1, "Write-Output 'ok'\n");
+            var r = Langs.Detect(ps1);
+            Assert.Equal("ps1", r.Kind);
+            Assert.Equal(CdpLanguages.PowerShell, r.Language);
+            Assert.Equal(dir, r.Root);
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void TryNormalize_Powershell_Aliases()
+    {
+        Assert.True(Langs.TryNormalize("ps1", out var lang));
+        Assert.Equal(CdpLanguages.PowerShell, lang);
+        Assert.True(Langs.TryNormalize("pwsh", out lang));
+        Assert.Equal(CdpLanguages.PowerShell, lang);
+    }
+
+    [Fact]
     public void Config_Can_Add_Language_Without_Enum()
     {
         var reg = new LanguageRegistry(
