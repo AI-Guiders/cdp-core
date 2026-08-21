@@ -197,6 +197,8 @@ public sealed class LanguageRegistry
         if (rule.LanguageId.Equals(CdpLanguages.Typescript, StringComparison.OrdinalIgnoreCase)
             || (rule.FileName?.Equals("tsconfig.json", StringComparison.OrdinalIgnoreCase) ?? false))
             tsconfig = anchor;
+        if (rule.LanguageId.Equals(CdpLanguages.PowerShell, StringComparison.OrdinalIgnoreCase))
+            solution = anchor;
 
         return new ProjectOpenResult(root, rule.Kind, rule.LanguageId, [anchor], solution, tsconfig);
     }
